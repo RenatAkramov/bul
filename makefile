@@ -1,19 +1,26 @@
-all: clean bul
+SHELL := /bin/bash
 
-flags = -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal -Winline -Wunreachable-code -Wmissing-declarations -Wmissing-include-dirs -Wswitch-enum -Wswitch-default -Weffc++ -Wmain -Wextra -Wall -g -pipe -fexceptions -Wcast-qual -Wconversion -Wctor-dtor-privacy -Wempty-body -Wformat-security -Wformat=2 -Wignored-qualifiers -Wlogical-op -Wno-missing-field-initializers -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wsign-promo -Wstack-usage=8192 -Wstrict-aliasing -Wstrict-null-sentinel -Wtype-limits -Wwrite-strings -Werror=vla -D_DEBUG -D_EJUDGE_CLIENT_SIDE
+CFLAGS := -std=gnu17 -O3 -march=native -Wall -Wextra -pedantic \
+          -fstack-protector-strong -D_FORTIFY_SOURCE=2 \
+          -fPIE -flto -g -fno-omit-frame-pointer -D_DEBUG
+
+LDFLAGS := -pie -Wl,-z,relro,-z,now
+
+SRCS := main.c lexical_analysis.c syntax_analysis.c grafdump.c \
+        calculation_functions.c par.c create_dnf_knf.c simplify.c print_tree.c
+
+OBJS := $(SRCS:.c=.o)
 
 
-bul: bul_func.o grafdump.o read_tree.o
-	g++ bul_func.o grafdump.o read_tree.o -o .\a.exe
+.PHONY: all
+all: bul_func.out
 
-bul_func.o: bul_func.cpp
-	g++ -c $(flags) bul_func.cpp
 
-grafdump.o: grafdump.cpp
-	g++ -c $(flags) grafdump.cpp
+bul_func.out: $(OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 
-read_tree.o: read_tree.cpp
-	g++ -c $(flags) read_tree.cpp
 
+.PHONY: clean
 clean:
-	rm -rf *.o *.exe *.exe.log *.exe.log.dmp
+	rm -f *.o *.out *.png *.dot 
+
